@@ -85,7 +85,134 @@ def escuchar_destino_whisper():
         # Aviso por voz si hay un error técnico
         decir_instruccion("Ha ocurrido un error técnico al procesar el audio.")
         return None
+
+def obtener_ciudad_actual(gmaps, coordenadas_gps):
+    print("🌍 Detectando tu ciudad actual...")
+    try:
+        # Le enviamos las coordenadas (Latitud, Longitud) a Google
+        resultados = gmaps.reverse_geocode(coordenadas_gps)
+        
+        if resultados:
+            # Google devuelve mucha info. Buscamos el componente que sea la "ciudad"
+            for componente in resultados[0]['address_components']:
+                if 'locality' in componente['types']:
+                    ciudad = componente['long_name']
+                    print(f"📍 Estás en: {ciudad}")
+                    return ciudad
+                    
+            # Si por lo que sea estás en un pueblo sin 'locality', buscamos la provincia
+            for componente in resultados[0]['address_components']:
+                if 'administrative_area_level_2' in componente['types']:
+                    provincia = componente['long_name']
+                    print(f"📍 Estás en la provincia de: {provincia}")
+                    return provincia
+                    
+        return "" # Si falla, devolvemos un texto vacío
+        
+    except Exception as e:
+        print(f"❌ Error al detectar la ciudad: {e}")
+        return ""
+   
+def obtener_destino_valido(gmaps, origen_gps):
+    ciudad_actual = obtener_ciudad_actual(gmaps, origen_gps)
     
+    while True: 
+        destino_hablado = escuchar_destino_whisper()
+        
+        if destino_hablado:
+            print(f"🔍 Evaluando '{destino_hablado}'...")
+            
+            resultados_global = gmaps.geocode(destino_hablado)
+            
+            se_dijo_ciudad = False
+            ciudad_detectada = None
+            
+            if resultados_global:
+                for comp in resultados_global[0]['address_components']:
+                    if 'locality' in comp['types'] or 'administrative_area_level_2' in comp['types']:
+                        ciudad_detectada = comp['long_name']
+                        break
+                        
+                # 1. COMPROBAR SI SE HA DICHO LA CIUDAD EXPLICÍTAMENTE
+                if ciudad_detectada and ciudad_detectada.lower() in destino_hablado.lower():
+                    texto_min = destino_hablado.lower().strip()
+                    ciudad_min = ciudad_detectada.lower()
+                    
+                    if f" en {ciudad_min}" in texto_min or f" a {ciudad_min}" in texto_min or texto_min == ciudad_min:
+                        se_dijo_ciudad = True
+            
+            if se_dijo_ciudad:
+                print(f"🏙️ Detectado que has especificado la ciudad: {ciudad_detectada}")
+                # 2. SI SE HA DICHO LA CIUDAD
+                tipos = resultados_global[0].get('types', [])
+                es_generico = 'locality' in tipos or 'country' in tipos
+                es_parcial = resultados_global[0].get('partial_match', False)
+                
+                if es_parcial and es_generico:
+                    print("❌ Dirección inválida en la ciudad especificada.")
+                    decir_instruccion(f"No encuentro ese lugar exacto en {ciudad_detectada}. Por favor, dímelo de nuevo.")
+                    continue
+                else:
+                    direccion_oficial = resultados_global[0]['formatted_address']
+                    print(f"✅ Dirección validada: {direccion_oficial}")
+                    decir_instruccion(f"Destino encontrado. Calculando ruta hacia {direccion_oficial}.")
+                    return direccion_oficial
+                    
+            else:
+                print("📍 No has especificado ciudad. Buscando la dirección más cercana...")
+                # 3. SI NO SE HA DICHO LA CIUDAD: Pelea de distancias
+                mejor_resultado = None
+                menor_distancia = float('inf') 
+                
+                # --- OPCIÓN A: Búsqueda Local Forzada ---
+                if ciudad_actual:
+                    resultados_local = gmaps.geocode(f"{destino_hablado}, {ciudad_actual}")
+                    if resultados_local:
+                        t = resultados_local[0].get('types', [])
+                        p = resultados_local[0].get('partial_match', False)
+                        
+                        # Aquí seguimos siendo ESTRICTOS. Si fuerza la ciudad y da genérico, es trampa.
+                        if not (p and ('locality' in t or 'country' in t)):
+                            lat = resultados_local[0]['geometry']['location']['lat']
+                            lng = resultados_local[0]['geometry']['location']['lng']
+                            dist = geodesic(origen_gps, (lat, lng)).kilometers
+                            
+                            if dist < menor_distancia:
+                                menor_distancia = dist
+                                mejor_resultado = resultados_local[0]
+                                
+                # --- OPCIÓN B: Búsqueda Global (Modificada para permitir correcciones) ---
+                if resultados_global:
+                    t = resultados_global[0].get('types', [])
+                    p = resultados_global[0].get('partial_match', False)
+                    
+                    # LA MAGIA: Permitimos los partial_match de 'locality' (pueblos mal pronunciados).
+                    # Solo bloqueamos si devuelve un PAÍS entero o si, por algún error raro, 
+                    # nos devuelve nuestra propia ciudad por defecto.
+                    es_nuestra_ciudad_por_defecto = ciudad_actual and (ciudad_actual.lower() in resultados_global[0]['formatted_address'].lower())
+                    es_pais = 'country' in t
+                    
+                    if not (p and (es_pais or es_nuestra_ciudad_por_defecto)):
+                        lat = resultados_global[0]['geometry']['location']['lat']
+                        lng = resultados_global[0]['geometry']['location']['lng']
+                        dist = geodesic(origen_gps, (lat, lng)).kilometers
+                        
+                        if dist < menor_distancia:
+                            menor_distancia = dist
+                            mejor_resultado = resultados_global[0]
+                            
+                # --- RESOLUCIÓN ---
+                if mejor_resultado:
+                    direccion_oficial = mejor_resultado['formatted_address']
+                    print(f"✅ Dirección validada (a {menor_distancia:.1f} km): {direccion_oficial}")
+                    decir_instruccion(f"Destino encontrado. Calculando ruta hacia {direccion_oficial}.")
+                    return direccion_oficial
+                else:
+                    print("❌ No se encontró ninguna dirección cercana válida.")
+                    decir_instruccion("No he podido encontrar ese lugar cerca de ti. Por favor, dímelo de nuevo.")
+                    continue
+        else:
+            decir_instruccion("Vamos a intentarlo otra vez.")
 
 def calcular_ruta(gmaps, origen, destino, modo_transporte="walking"):
     print(f"Calculando ruta desde '{origen}' hasta '{destino}'...\n")
@@ -216,3 +343,6 @@ def iniciar_navegacion_simulada(pasos_de_la_ruta, ubicacion_inicial):
                 time.sleep(1.5) 
                 
     decir_instruccion("Has llegado a tu destino. Navegación finalizada.")
+
+
+    
