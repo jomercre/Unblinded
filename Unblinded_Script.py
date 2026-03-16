@@ -28,8 +28,6 @@ def ReadMode(img_path):
     
     return text
 
-
-
 def TextToSpeech(text):
     
     tts = gTTS(text=text, lang='es', slow=False)
