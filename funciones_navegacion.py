@@ -7,9 +7,22 @@ from gtts import gTTS
 import pygame
 from geopy.distance import geodesic
 import speech_recognition as sr
+import os
+from dotenv import load_dotenv
+from PIL import Image
+import google.generativeai as genai
+from groq import Groq
+import base64
+import easyocr
+
 
 #  Inicializar el mezclador de audio de pygame
 pygame.mixer.init()
+
+#  Inicializar el cliente con API Key
+load_dotenv()
+API_KEY = os.getenv("GROQ_API_KEY")
+client = Groq(api_key=API_KEY)
 
 def decir_instruccion(texto):
     print(f"🔊 Hablando: '{texto}'")
@@ -348,6 +361,51 @@ def iniciar_navegacion_simulada(pasos_de_la_ruta, ubicacion_inicial):
 
 # Funciones para utilizar IA generativa
 
+def ReadMode(img_path):
+
+    lector = easyocr.Reader(['es'])
+    
+    resultados = lector.readtext(img_path)
+    
+    lista_de_textos = [fragmento[1] for fragmento in resultados]
+
+    # Unimos todo el texto en una única variable
+    text = " ".join(lista_de_textos)
+    
+    return text
+
+def TextToSpeech(texto):
+    
+    # Generamos un nombre único basado en el tiempo actual para evitar bloqueos
+    nombre_archivo = f"instruccion_{int(time.time())}.mp3"
+    
+    try:
+        # Generar y guardar el audio con el nombre único
+        tts = gTTS(text=texto, lang='es', slow=False)
+        tts.save(nombre_archivo)
+        
+        # Cargar y reproducir
+        pygame.mixer.music.load(nombre_archivo)
+        pygame.mixer.music.play()
+        
+        # Esperar a que termine de hablar
+        while pygame.mixer.music.get_busy():
+            time.sleep(0.1)
+            
+        # Soltar el archivo de la memoria de pygame
+        pygame.mixer.music.unload()
+        
+        # Borrar el archivo de tu disco duro para no dejar basura
+        if os.path.exists(nombre_archivo):
+            os.remove(nombre_archivo)
+        else:
+            print('No se ha podido borrar')
+            
+    except Exception as e:
+        print(f"Error al generar o reproducir la voz: {e}")
+    
+    return
+
 def image_file_to_base64(image_path):
     try:
         # Abrimos el archivo en modo lectura binaria ("rb")
@@ -360,20 +418,40 @@ def image_file_to_base64(image_path):
         print(f"Error al leer la imagen: {e}")
         return None
 
-def ask_groq(prompt=None, img_path=None):
+def ask_Groq(prompt=None, img_path=None, Danger=False):
     try:
-        if img_path is None:
-            print('Mode 1')
+        if img_path is None and Danger == False:
             # Modo solo texto: usamos un modelo optimizado para texto
             chat_completion = client.chat.completions.create(
                 messages=[
                     {
                         "role": "system", 
                         "content": (
-                            "Eres un asistente de accesibilidad visual para personas ciegas. "
                             "REGLAS ESTRICTAS: "
                             "1. NUNCA uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
                             "2. Sé extremadamente preciso, objetivo y ve directo al grano. "
+                        )
+                    },
+                    {"role": "user", "content": prompt}
+                ],
+                model="llama-3.3-70b-versatile", 
+            )
+            
+            return chat_completion.choices[0].message.content
+        
+        elif img_path is None and Danger:
+            # Modo solo texto: usamos un modelo optimizado para texto
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system", 
+                        "content": (
+                            "Eres un asistente de accesibilidad visual para personas ciegas."
+                            "REGLAS ESTRICTAS: "
+                            "1. El texto de entrada procede de una imagen, si encuentras algun peligro para personas invidentes añadelo a principio del texto."
+                            "2. En caso de no detectar peligro no indiques que no hay peligro, limitate a realizar un resumen del texto."
+                            "3. NUNCA uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
+                            "4. Sé extremadamente preciso, objetivo y ve directo al grano."
                         )
                     },
                     {"role": "user", "content": prompt}
@@ -386,9 +464,8 @@ def ask_groq(prompt=None, img_path=None):
 
             img_base64 = image_file_to_base64(img_path)
 
-            print('Mode 2')
             # Modo solo imagen con instrucciones predeterminadas
-            text_prompt = "Soy una persona ciega que quiero que me describas lo mas importante de esta imagen: Si encuentras algún peligro en la imagen indicalo de forma concisa, en caso contrario describe la imagen lo mejor que puedas"
+            text_prompt = "Soy una persona ciega que quiero obtener información detallada de la siguiente imagen:"
             
             chat_completion = client.chat.completions.create(
                 messages=[
@@ -398,10 +475,7 @@ def ask_groq(prompt=None, img_path=None):
                             "Eres un asistente de accesibilidad visual para personas ciegas. "
                             "REGLAS ESTRICTAS: "
                             "1. Responde ÚNICAMENTE con la descripción de la imagen o la advertencia de peligro. "
-                            "2. NUNCA uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
-                            "3. Sé extremadamente preciso, objetivo y ve directo al grano. "
-                            "4. Si hay un peligro, indícalo como primera palabra. En caso contrario no hace falta que indiques que no hay peligro."
-                        )
+                            "2. NUNCA uses saludos, introducciones ni despedidas. ")
                     },
                     {
                         "role": "user",
@@ -419,7 +493,6 @@ def ask_groq(prompt=None, img_path=None):
 
             img_base64 = image_file_to_base64(img_path)
 
-            print('Mode 3')
             # Modo texto e imagen
             text_prompt = f"Soy una persona ciega que quiero obtener información de la siguiente imagen: {prompt}"
             

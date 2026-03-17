@@ -6,38 +6,7 @@
 
 # Libraries
 
-from PIL import Image
-import easyocr
-from gtts import gTTS
-import os
-
-# Functions
-
-# !!!Añadir idioma como entrada!!!
-
-def ReadMode(img_path):
-
-    lector = easyocr.Reader(['es'])
-    
-    resultados = lector.readtext(img_path)
-    
-    lista_de_textos = [fragmento[1] for fragmento in resultados]
-
-    # Unimos todo el texto en una única variable
-    text = " ".join(lista_de_textos)
-    
-    return text
-
-def TextToSpeech(text):
-    
-    tts = gTTS(text=text, lang='es', slow=False)
-    
-    tts.save("lectura.mp3")
-    
-    os.system("start lectura.mp3")
-    
-    return
-
+from funciones_navegacion import *
 
 # Mode selector
 
@@ -66,14 +35,39 @@ while M != 'R' and M != 'D' and M != 'N' and M != 'R':
 
 # Image input
 
-img_path = 'example_read.jpeg'
+img_path = 'example_read_pc.png'
 
 # Generate text
 
 if M == 'R':
     
+    # Read the image
+    
     text = ReadMode(img_path)
-
+    
+    # Detect text
+    
+    if text == "":
+        text = "Texto no detectado"
+    else:
+        # Correct text
+        
+        Intro = "Corrige el siguiente texto, añadiendo artículos y cambiando palabras si es necesario, para que sea más comprensible: "
+        Conc = " Devuelve únicamente la versión corregida del texto, no añadas ningún comentario adicional."
+        corr_prompt = Intro + text + Conc
+                        
+        text = ask_Groq(prompt = corr_prompt)
+    
+elif M == 'D':
+    
+    # Obtain information about the image
+    
+    descr = ask_Groq(img_path=img_path)
+    
+    # Detect danger
+    
+    text = ask_Groq(prompt=descr, Danger = True)
+    
 # Generate audio
 
 audio = TextToSpeech(text)
