@@ -345,4 +345,108 @@ def iniciar_navegacion_simulada(pasos_de_la_ruta, ubicacion_inicial):
     decir_instruccion("Has llegado a tu destino. Navegación finalizada.")
 
 
-    
+
+# Funciones para utilizar IA generativa
+
+def image_file_to_base64(image_path):
+    try:
+        # Abrimos el archivo en modo lectura binaria ("rb")
+        with open(image_path, "rb") as image_file:
+            # Leemos y codificamos el archivo
+            encoded_string = base64.b64encode(image_file.read())
+            # Lo decodificamos a utf-8 para que sea una cadena de texto normal
+            return encoded_string.decode('utf-8')
+    except Exception as e:
+        print(f"Error al leer la imagen: {e}")
+        return None
+
+def ask_groq(prompt=None, img_path=None):
+    try:
+        if img_path is None:
+            print('Mode 1')
+            # Modo solo texto: usamos un modelo optimizado para texto
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system", 
+                        "content": (
+                            "Eres un asistente de accesibilidad visual para personas ciegas. "
+                            "REGLAS ESTRICTAS: "
+                            "1. NUNCA uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
+                            "2. Sé extremadamente preciso, objetivo y ve directo al grano. "
+                        )
+                    },
+                    {"role": "user", "content": prompt}
+                ],
+                model="llama-3.3-70b-versatile", 
+            )
+            return chat_completion.choices[0].message.content
+
+        elif prompt is None:
+
+            img_base64 = image_file_to_base64(img_path)
+
+            print('Mode 2')
+            # Modo solo imagen con instrucciones predeterminadas
+            text_prompt = "Soy una persona ciega que quiero que me describas lo mas importante de esta imagen: Si encuentras algún peligro en la imagen indicalo de forma concisa, en caso contrario describe la imagen lo mejor que puedas"
+            
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system", 
+                        "content": (
+                            "Eres un asistente de accesibilidad visual para personas ciegas. "
+                            "REGLAS ESTRICTAS: "
+                            "1. Responde ÚNICAMENTE con la descripción de la imagen o la advertencia de peligro. "
+                            "2. NUNCA uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
+                            "3. Sé extremadamente preciso, objetivo y ve directo al grano. "
+                            "4. Si hay un peligro, indícalo como primera palabra. En caso contrario no hace falta que indiques que no hay peligro."
+                        )
+                    },
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": text_prompt},
+                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_base64}"}}
+                        ]
+                    }
+                ],
+                model="meta-llama/llama-4-scout-17b-16e-instruct", # Modelo específico para visión
+            )
+            return chat_completion.choices[0].message.content
+
+        else:
+
+            img_base64 = image_file_to_base64(img_path)
+
+            print('Mode 3')
+            # Modo texto e imagen
+            text_prompt = f"Soy una persona ciega que quiero obtener información de la siguiente imagen: {prompt}"
+            
+            chat_completion = client.chat.completions.create(
+                messages=[
+                                {
+                        "role": "system", 
+                        "content": (
+                            "Eres un asistente de accesibilidad visual para personas ciegas. "
+                            "REGLAS ESTRICTAS: "
+                            "1. Responde ÚNICAMENTE con la descripción de la imagen o la advertencia de peligro. "
+                            "2. NUNCA uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
+                            "3. Sé extremadamente preciso, objetivo y ve directo al grano. "
+                            "4. Si hay un peligro, indícalo como primera palabra. En caso contrario no hace falta que indiques que no hay peligro."
+                        )
+                    },
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": text_prompt},
+                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_base64}"}}
+                        ]
+                    }
+                ],
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
+            )
+            return chat_completion.choices[0].message.content
+
+    except Exception as e:
+        return f"Error en la petición: {e}"
