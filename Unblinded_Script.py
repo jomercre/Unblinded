@@ -10,13 +10,13 @@ from funciones_navegacion import *
 
 # Mode selector
 
-M = 'R'
+M = 'F'
 '''
 print('Available models:')
 print('Read -> R')
 print('Description -> D')
 print('Navigation -> N')
-print('Detector -> D\n')
+print('Finding -> F\n')
 
 M = input('Mode: ')
 
@@ -67,9 +67,28 @@ elif M == 'D':
     # Detect danger
     
     text = ask_Groq(prompt=descr, Danger = True)
+
+elif M == 'F':
+
+    # Tratamiento del texto obtenido
+
+    text = "Quiero que me digas donde se encuentra el pelo"
+
+    # Reduction of the text
+
+    text = find_Groq(prompt=text)
+
+    # Traduction to english
+
+    Intro = "Traduceme el siguiente texto a inglés: "
+    prompt = Intro + text
+
+    prompt = ask_Groq(prompt=prompt)
+    print(prompt)
+    text = prompt
     
 # Generate audio
 
-audio = TextToSpeech(text)
+TextToSpeech(text)
 
 

@@ -10,7 +10,6 @@ import speech_recognition as sr
 import os
 from dotenv import load_dotenv
 from PIL import Image
-import google.generativeai as genai
 from groq import Groq
 import base64
 import easyocr
@@ -521,5 +520,31 @@ def ask_Groq(prompt=None, img_path=None, Danger=False):
             )
             return chat_completion.choices[0].message.content
 
+    except Exception as e:
+        return f"Error en la petición: {e}"
+    
+def find_Groq(prompt):
+    try:
+        # Modo solo texto: usamos un modelo optimizado para texto
+        chat_completion = client.chat.completions.create(
+        messages=[
+                    {
+                        "role": "system", 
+                        "content": (
+                            "El texto procede de una persona invidente que desea encontrar un objeto."
+                            "Tu finalidad es extraer del texto el objeto que se está buscando."
+                            "REGLAS ESTRICTAS: "
+                            "1. NUNCA uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
+                            "2. Sé extremadamente preciso, objetivo y ve directo al grano. "
+                            "3. La salida está limitada a una única palabra. "
+                        )
+                    },
+                    {"role": "user", "content": prompt}
+                ],
+                model="llama-3.3-70b-versatile", 
+            )
+            
+        return chat_completion.choices[0].message.content
+        
     except Exception as e:
         return f"Error en la petición: {e}"
