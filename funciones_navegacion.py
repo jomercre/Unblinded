@@ -22,6 +22,8 @@ pygame.mixer.init()
 load_dotenv()
 API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=API_KEY)
+API_KEY = os.getenv("MAPS_API_KEY")
+gmaps = googlemaps.Client(key=API_KEY)
 
 def decir_instruccion(texto):
     print(f"🔊 Hablando: '{texto}'")
@@ -353,8 +355,6 @@ def iniciar_navegacion_simulada(pasos_de_la_ruta, ubicacion_inicial):
             else:
                 # En la simulación esperamos 1.5 segundos para que veas el progreso en consola
                 time.sleep(1.5) 
-                
-    decir_instruccion("Has llegado a tu destino. Navegación finalizada.")
 
 
 

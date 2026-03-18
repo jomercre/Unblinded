@@ -10,7 +10,7 @@ from funciones_navegacion import *
 
 # Mode selector
 
-M = 'F'
+M = 'SN'
 '''
 print('Available models:')
 print('Read -> R')
@@ -28,7 +28,8 @@ while M != 'R' and M != 'D' and M != 'N' and M != 'R':
     print('Read -> R')
     print('Description -> D')
     print('Navigation -> N')
-    print('Detector -> D\n')
+    print('Simulated Navigation -> SN')
+    print('Finding -> F\n')
     
     M = input('Mode: ')
 '''
@@ -67,7 +68,40 @@ elif M == 'D':
     # Detect danger
     
     text = ask_Groq(prompt=descr, Danger = True)
-
+    
+elif M == 'SN':
+    
+    origen_gps = (39.4699, -0.3763)
+    
+    '''
+    destino_texto = obtener_destino_valido(gmaps, origen_gps)
+    
+    # Correct text
+    
+    Intro = "Corrige el siguiente texto, añadiendo artículos y cambiando palabras si es necesario, para que sea más comprensible: "
+    Conc = " Devuelve únicamente la versión corregida del texto, no añadas ningún comentario adicional."
+    corr_prompt = Intro + text + Conc
+                    
+    text = ask_Groq(prompt = corr_prompt)
+    '''
+    
+    text = 'Ciudad de las artes y las ciencias'
+    
+    # Puedes usar direcciones exactas, nombres de ciudades, o lugares emblemáticos
+    mi_ubicacion = "Valencia, España" 
+    mi_destino = text
+    
+    resultado=calcular_ruta(gmaps, mi_ubicacion, mi_destino)
+    
+    if resultado:
+        # Extraemos los pasos exactamente como discutimos
+        pasos = resultado[0]['legs'][0]['steps']
+        
+        # Arrancamos el simulador pasándole los pasos y nuestra posición inicial
+        iniciar_navegacion_simulada(pasos, origen_gps)
+    
+    text = "Has llegado a tu destino. Navegación finalizada."
+    
 elif M == 'F':
 
     # Tratamiento del texto obtenido
