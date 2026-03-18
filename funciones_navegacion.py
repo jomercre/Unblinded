@@ -505,7 +505,7 @@ def ask_Groq(prompt=None, img_path=None, Danger=False):
                             "1. Responde ÚNICAMENTE con la descripción de la imagen o la advertencia de peligro. "
                             "2. NUNCA uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
                             "3. Sé extremadamente preciso, objetivo y ve directo al grano. "
-                            "4. Si hay un peligro, indícalo como primera palabra. En caso contrario no hace falta que indiques que no hay peligro."
+                            "4. No menciones el color de los objetos resaltados. "
                         )
                     },
                     {
@@ -531,12 +531,24 @@ def find_Groq(prompt):
                     {
                         "role": "system", 
                         "content": (
-                            "El texto procede de una persona invidente que desea encontrar un objeto."
-                            "Tu finalidad es extraer del texto el objeto que se está buscando."
-                            "REGLAS ESTRICTAS: "
-                            "1. NUNCA uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
-                            "2. Sé extremadamente preciso, objetivo y ve directo al grano. "
-                            "3. La salida está limitada a una única palabra. "
+                            """Actúa como un extractor automático de entidades. El siguiente texto procede de una persona invidente que desea encontrar un objeto.
+                                Tu única finalidad es identificar y extraer el objeto que se está buscando.
+                                
+                                REGLAS ESTRICTAS E INQUEBRANTABLES:
+                                1. CERO CONVERSACIÓN: NUNCA uses saludos, introducciones, explicaciones, ni puntuación final.
+                                2. UNA SOLA PALABRA: La salida debe ser ESTRICTAMENTE el sustantivo principal del objeto. Nada más.
+                                3. FORMATO: Devuelve la palabra siempre en minúsculas.
+                                4. OBJETOS COMPUESTOS: Si el usuario menciona características (ej. "taza roja") o nombres compuestos (ej. "gafas de sol"), extrae ÚNICAMENTE el sustantivo base ("taza", "gafas").
+                                
+                                EJEMPLOS DE SALIDA ESPERADA:
+                                Entrada: "¿Dónde he dejado mis llaves?"
+                                Salida: llaves
+                                
+                                Entrada: "Ayúdame a encontrar el bastón, por favor."
+                                Salida: bastón
+                                
+                                Entrada: "Quiero buscar mi teléfono móvil."
+                                Salida: teléfono"""
                         )
                     },
                     {"role": "user", "content": prompt}
