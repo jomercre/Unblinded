@@ -560,3 +560,46 @@ def find_Groq(prompt):
         
     except Exception as e:
         return f"Error en la petición: {e}"
+    
+def SpeechToText():
+    reconocedor = sr.Recognizer()
+    
+    with sr.Microphone() as origen:
+        print("\n🎤 Calibrando el ruido de fondo...")
+        reconocedor.adjust_for_ambient_noise(origen)
+        
+        print("🗣️ Ya puedes hablar. Dime lo que deseas buscar...")
+        # 1. El asistente te pregunta por voz el destino
+        decir_instruccion("Dime lo que deseas buscar...")
+        
+        # Escucha tu respuesta
+        audio = reconocedor.listen(origen)
+        
+    try:
+        print("⏳ Transcribiendo con Whisper (esto puede tardar unos segundos dependiendo de tu PC)...")
+        
+        # AQUÍ ESTÁ LA MAGIA DE WHISPER
+        texto_detectado = reconocedor.recognize_whisper(
+            audio, 
+            model="small", 
+            language="spanish" # Obligamos al modelo a escuchar en español
+        )
+        
+        # Whisper a veces añade espacios o puntos al final, lo limpiamos un poco
+        texto_detectado = texto_detectado.strip()
+        
+        print(f"✅ Has dicho: '{texto_detectado}'")
+        
+        return texto_detectado
+        
+    except sr.UnknownValueError:
+        print("❌ Whisper no pudo procesar el audio.")
+        # Aviso por voz si no entiende
+        decir_instruccion("No he podido entenderte, por favor inténtalo de nuevo.") 
+        return None
+        
+    except Exception as e:
+        print(f"❌ Ocurrió un error con Whisper: {e}")
+        # Aviso por voz si hay un error técnico
+        decir_instruccion("Ha ocurrido un error técnico al procesar el audio.")
+        return None

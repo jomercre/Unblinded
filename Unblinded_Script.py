@@ -71,8 +71,20 @@ elif M == 'D':
 elif M == 'F':
 
     # Tratamiento del texto obtenido
-
-    text = "Quiero que me digas donde se encuentra el pelo"
+    
+    text = None
+    
+    while text is None:
+        
+        text = SpeechToText()
+        
+     # Correct text
+     
+    Intro = "Corrige el siguiente texto, añadiendo artículos y cambiando palabras si es necesario, para que sea más comprensible: "
+    Conc = " Devuelve únicamente la versión corregida del texto, no añadas ningún comentario adicional."
+    corr_prompt = Intro + text + Conc
+                     
+    text = ask_Groq(prompt = corr_prompt)
 
     # Reduction of the text
 
