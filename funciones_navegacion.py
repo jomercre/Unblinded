@@ -309,10 +309,6 @@ def iniciar_navegacion(pasos_de_la_ruta):
                 time.sleep(2)
                 
     decir_instruccion("Has llegado a tu destino. Navegación finalizada.")
-
-
-
-
     
 def iniciar_navegacion_simulada(pasos_de_la_ruta, ubicacion_inicial):
     print("\n" + "="*40)

@@ -4,54 +4,56 @@
 #
 # Creadores: Axel Valton Juan & Joan Merlos Cremades
 
-# Libraries
+# Librerías
 
 from funciones_navegacion import *
+import tkinter as tk
+from tkinter import ttk, messagebox
 
-# Mode selector
+# Selector de modos
 
-M = 'SN'
-'''
-print('Available models:')
-print('Read -> R')
-print('Description -> D')
-print('Navigation -> N')
-print('Finding -> F\n')
+M = ''
 
-M = input('Mode: ')
-
-while M != 'R' and M != 'D' and M != 'N' and M != 'R':
+def confirmar_seleccion():
     
-    print('\nMode unavailable\n')
+    global M
     
-    print('Available models:')
-    print('Read -> R')
-    print('Description -> D')
-    print('Navigation -> N')
-    print('Simulated Navigation -> SN')
-    print('Finding -> F\n')
-    
-    M = input('Mode: ')
-'''
+    M = combo.get()
+    messagebox.showinfo("Selección Final", f"Has elegido: {M}")
+    ventana.destroy()
 
-# Image input
+ventana = tk.Tk()
+ventana.title("Selector de modos")
+ventana.geometry("350x200")
+label = tk.Label(ventana, text="¿Qué modo deseas activar?", font=("Arial", 12))
+label.pack(pady=20)
+opciones = ["Lectura", "Descripción", "Navegación guiada", "Búsqueda"]
+combo = ttk.Combobox(ventana, values=opciones, state="readonly")
+combo.pack(pady=5)
+combo.current(0)
+boton = tk.Button(ventana, text="Ejecutar", command=confirmar_seleccion, bg="#4CAF50", fg="white")
+boton.pack(pady=20)
+ventana.mainloop()
+
+# Imagen de entrada
 
 img_path = 'new_img.png'
 
-# Generate text
+# Generar el texto de salida
 
-if M == 'R':
+if M == 'Lectura':
     
-    # Read the image
+    # Leer la imagen
     
     text = ReadMode(img_path)
     
-    # Detect text
+    # Detectar si hay texto
     
     if text == "":
         text = "Texto no detectado"
     else:
-        # Correct text
+        
+        # Corrección del texto
         
         Intro = "Corrige el siguiente texto, añadiendo artículos y cambiando palabras si es necesario, para que sea más comprensible: "
         Conc = " Devuelve únicamente la versión corregida del texto, no añadas ningún comentario adicional."
@@ -59,24 +61,24 @@ if M == 'R':
                         
         text = ask_Groq(prompt = corr_prompt)
     
-elif M == 'D':
+elif M == 'Descripción':
     
-    # Obtain information about the image
+    # Obtener información de la imagen
     
     descr = ask_Groq(img_path=img_path)
     
-    # Detect danger
+    # Detectar si hay peligro
     
     text = ask_Groq(prompt=descr, Danger = True)
     
-elif M == 'SN':
+elif M == 'Navegación guiada':
     
     origen_gps = (39.4699, -0.3763)
     
     '''
     destino_texto = obtener_destino_valido(gmaps, origen_gps)
     
-    # Correct text
+    # Corrección del texto
     
     Intro = "Corrige el siguiente texto, añadiendo artículos y cambiando palabras si es necesario, para que sea más comprensible: "
     Conc = " Devuelve únicamente la versión corregida del texto, no añadas ningún comentario adicional."
@@ -87,22 +89,23 @@ elif M == 'SN':
     
     text = 'Ciudad de las artes y las ciencias'
     
-    # Puedes usar direcciones exactas, nombres de ciudades, o lugares emblemáticos
+    # Cálculo de la ruta
     mi_ubicacion = "Valencia, España" 
     mi_destino = text
     
     resultado=calcular_ruta(gmaps, mi_ubicacion, mi_destino)
     
+    # Comprobamos que exista una ruta válida
+    
     if resultado:
-        # Extraemos los pasos exactamente como discutimos
-        pasos = resultado[0]['legs'][0]['steps']
+        # Iniciamos la navegación simulada
         
-        # Arrancamos el simulador pasándole los pasos y nuestra posición inicial
+        pasos = resultado[0]['legs'][0]['steps']
         iniciar_navegacion_simulada(pasos, origen_gps)
     
     text = "Has llegado a tu destino. Navegación finalizada."
     
-elif M == 'F':
+elif M == 'Búsqueda':
 
     # Tratamiento del texto obtenido
     
@@ -112,7 +115,7 @@ elif M == 'F':
         
         text = SpeechToText()
         
-     # Correct text
+     # Corrección del texto
      
     Intro = "Corrige el siguiente texto, añadiendo artículos y cambiando palabras si es necesario, para que sea más comprensible: "
     Conc = " Devuelve únicamente la versión corregida del texto, no añadas ningún comentario adicional."
@@ -120,11 +123,11 @@ elif M == 'F':
                      
     text = ask_Groq(prompt = corr_prompt)
 
-    # Reduction of the text
+    # Reducción del texto
 
     text = find_Groq(prompt=text)
 
-    # Traduction to english
+    # Traduccción del texto al inglés
 
     Intro = "Traduceme el siguiente texto a inglés: "
     prompt = Intro + text
@@ -134,22 +137,20 @@ elif M == 'F':
     
     input('Pon cualquier cosa cuando hayas obtenido la imagen: ')
     
-    # Obtain information about the image
+    # Obtener información de la imagen
     
-    prompt = f"""Actúa como un asistente experto en accesibilidad visual. Te voy a proporcionar una imagen donde hay varios objetos resaltados explícitamente con colores vistosos. 
-
-                    Tu objetivo es ayudar a una persona ciega a construir un mapa mental preciso de la escena. Por favor, sigue exactamente estos pasos:
+    prompt = """Actúa como un asistente experto en accesibilidad visual. Te voy a proporcionar una imagen donde hay varios objetos resaltados explícitamente con colores vistosos.
+                Tu objetivo es ayudar a una persona ciega a construir un mapa mental preciso de la escena. Por favor, sigue exactamente estos pasos:
                             
-                    1. Contexto breve: Describe en una sola oración el entorno general de la imagen (por ejemplo, 'Es una cocina vista desde el frente' o 'Es una calle concurrida').
-                    2. Identificación y Ubicación: Por cada objeto resaltado que detectes, indica qué es y detalla su posición utilizando una cuadrícula imaginaria de 3x3 (arriba/centro/abajo y izquierda/centro/derecha). 
-                    3. Relación espacial (opcional pero recomendada): Si hay varios objetos resaltados, describe brevemente cómo están ubicados unos respecto a otros (ej. 'El objeto A está justo a la derecha y ligeramente por delante del objeto B').
+                1. Describe en una sola oración el entorno general de la imagen (por ejemplo, 'Es una cocina vista desde el frente' o 'Es una calle concurrida').
+                2. Por cada objeto resaltado que detectes, indica qué es y detalla su posición utilizando una cuadrícula imaginaria de 3x3 (arriba/centro/abajo y izquierda/centro/derecha). 
+                3. Si hay varios objetos resaltados, describe brevemente cómo están ubicados unos respecto a otros (ej. 'El objeto A está justo a la derecha y ligeramente por delante del objeto B').
                             
-                    Ignora los objetos que no estén resaltados, a menos que sean un punto de referencia indispensable para ubicar a los que sí lo están. Sé claro, objetivo y descriptivo."""
+                Ignora los objetos que no estén resaltados, a menos que sean un punto de referencia indispensable para ubicar a los que sí lo están. Sé claro, objetivo y preciso."""
 
     text = ask_Groq(img_path=img_path, prompt=prompt)
     
-# Generate audio
+# Generar el audio de salida
 
 TextToSpeech(text)
-
 
