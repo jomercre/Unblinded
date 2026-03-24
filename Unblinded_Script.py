@@ -6,7 +6,7 @@
 
 # Librerías
 
-from funciones_navegacion import *
+from Unblinded_Functions import *
 import tkinter as tk
 from tkinter import ttk, messagebox
 
