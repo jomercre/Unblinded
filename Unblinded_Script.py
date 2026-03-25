@@ -37,7 +37,7 @@ ventana.mainloop()
 
 # Imagen de entrada
 
-img_path = 'new_img.png'
+img_path = 'Imagenes de ejemplo/new_img.png'
 
 # Generar el texto de salida
 
@@ -113,7 +113,7 @@ elif M == 'Búsqueda':
         
      # Corrección del texto
      
-    Intro = "Corrige el siguiente texto, añadiendo artículos y cambiando palabras si es necesario, para que sea más comprensible: "
+    Intro = "Corrige el siguiente texto, añadiendo artículos y cambiando palabras si es necesario, para que sea más comprensible y coincida con nombres de calles o lugares reales: "
     Conc = " Devuelve únicamente la versión corregida del texto, no añadas ningún comentario adicional."
     corr_prompt = Intro + text + Conc
                      
