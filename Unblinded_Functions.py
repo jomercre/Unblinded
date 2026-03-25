@@ -20,9 +20,10 @@ from dotenv import load_dotenv
 from PIL import Image
 from groq import Groq
 import base64
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 import easyocr
 
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 
 # Inicializamos el mezclador de audio de pygame
 
