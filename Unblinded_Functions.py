@@ -22,6 +22,8 @@ from groq import Groq
 import base64
 import easyocr
 
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 # Inicializamos el mezclador de audio de pygame
 
 pygame.mixer.init()

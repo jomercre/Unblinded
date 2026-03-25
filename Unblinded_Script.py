@@ -75,19 +75,15 @@ elif M == 'Navegación guiada':
     
     origen_gps = (39.4699, -0.3763)
     
-    '''
     destino_texto = obtener_destino_valido(gmaps, origen_gps)
     
     # Corrección del texto
     
     Intro = "Corrige el siguiente texto, añadiendo artículos y cambiando palabras si es necesario, para que sea más comprensible: "
     Conc = " Devuelve únicamente la versión corregida del texto, no añadas ningún comentario adicional."
-    corr_prompt = Intro + text + Conc
+    corr_prompt = Intro + destino_texto + Conc
                     
     text = ask_Groq(prompt = corr_prompt)
-    '''
-    
-    text = 'Ciudad de las artes y las ciencias'
     
     # Cálculo de la ruta
     mi_ubicacion = "Valencia, España" 
