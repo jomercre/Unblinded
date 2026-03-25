@@ -94,6 +94,7 @@ elif M == 'Navegación guiada':
     # Comprobamos que exista una ruta válida
     
     if resultado:
+        
         # Iniciamos la navegación simulada
         
         pasos = resultado[0]['legs'][0]['steps']
@@ -103,48 +104,7 @@ elif M == 'Navegación guiada':
     
 elif M == 'Búsqueda':
 
-    # Tratamiento del texto obtenido
-    
-    text = None
-    
-    while text is None:
-        
-        text = SpeechToText()
-        
-     # Corrección del texto
-     
-    Intro = "Corrige el siguiente texto, añadiendo artículos y cambiando palabras si es necesario, para que sea más comprensible y coincida con nombres de calles o lugares reales: "
-    Conc = " Devuelve únicamente la versión corregida del texto, no añadas ningún comentario adicional."
-    corr_prompt = Intro + text + Conc
-                     
-    text = ask_Groq(prompt = corr_prompt)
-
-    # Reducción del texto
-
-    text = find_Groq(prompt=text)
-
-    # Traduccción del texto al inglés
-
-    Intro = "Traduceme el siguiente texto a inglés: "
-    prompt = Intro + text
-
-    prompt = ask_Groq(prompt=prompt)
-    print(prompt)
-    
-    input('Pon cualquier cosa cuando hayas obtenido la imagen: ')
-    
-    # Obtener información de la imagen
-    
-    prompt = """Actúa como un asistente experto en accesibilidad visual. Te voy a proporcionar una imagen donde hay varios objetos resaltados explícitamente con colores vistosos.
-                Tu objetivo es ayudar a una persona ciega a construir un mapa mental preciso de la escena. Por favor, sigue exactamente estos pasos:
-                            
-                1. Describe en una sola oración el entorno general de la imagen (por ejemplo, 'Es una cocina vista desde el frente' o 'Es una calle concurrida').
-                2. Por cada objeto resaltado que detectes, indica qué es y detalla su posición utilizando una cuadrícula imaginaria de 3x3 (arriba/centro/abajo y izquierda/centro/derecha). 
-                3. Si hay varios objetos resaltados, describe brevemente cómo están ubicados unos respecto a otros (ej. 'El objeto A está justo a la derecha y ligeramente por delante del objeto B').
-                            
-                Ignora los objetos que no estén resaltados, a menos que sean un punto de referencia indispensable para ubicar a los que sí lo están. Sé claro, objetivo y preciso."""
-
-    text = ask_Groq(img_path=img_path, prompt=prompt)
+    text = 'Para utilizar el modo búsqueda utiliza el archivo Unblinded_busqueda.ipynb'
     
 # Generar el audio de salida
 
