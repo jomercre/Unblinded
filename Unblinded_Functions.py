@@ -121,9 +121,10 @@ def ask_Groq(prompt=None, img_path=None, Danger=False):
                             "Eres un asistente de accesibilidad visual para personas ciegas."
                             "REGLAS ESTRICTAS: "
                             "1. El texto de entrada procede de una imagen, si encuentras algun peligro para personas invidentes añadelo a principio del texto."
+                            "   Los principales peligros que debes detectar son semáforos en rojo, aceras sin paso de cebra o zonas con caídas abruptas."
                             "2. En caso de no detectar peligro no indiques que no hay peligro, limitate a realizar un resumen del texto."
-                            "3. NUNCA uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
-                            "4. Sé extremadamente preciso, objetivo y ve directo al grano."
+                            "3. Nunca uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
+                            "4. Sé extremadamente preciso y objetivo, evitando descripciones que puedan resultar obvias para una persona tales como el mar es azul o el césped es verde."
                         )
                     },
                     {"role": "user", "content": prompt}
@@ -145,8 +146,8 @@ def ask_Groq(prompt=None, img_path=None, Danger=False):
                         "content": (
                             "Eres un asistente de accesibilidad visual para personas ciegas. "
                             "REGLAS ESTRICTAS: "
-                            "1. Responde ÚNICAMENTE con la descripción de la imagen o la advertencia de peligro. "
-                            "2. NUNCA uses saludos, introducciones ni despedidas. ")
+                            "1. Responde únicamente con la descripción de la imagen o la advertencia de peligro. "
+                            "2. Nunca uses saludos, introducciones ni despedidas. ")
                     },
                     {
                         "role": "user",
@@ -173,8 +174,8 @@ def ask_Groq(prompt=None, img_path=None, Danger=False):
                         "content": (
                             "Eres un asistente de accesibilidad visual para personas ciegas. "
                             "REGLAS ESTRICTAS: "
-                            "1. Responde ÚNICAMENTE con la descripción de la imagen o la advertencia de peligro. "
-                            "2. NUNCA uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
+                            "1. Responde únicamente con la descripción de la imagen o la advertencia de peligro. "
+                            "2. Nunca uses saludos, introducciones (como 'Aquí tienes', 'Me encantaría describir', 'En la imagen se ve') ni despedidas. "
                             "3. Sé extremadamente preciso, objetivo y ve directo al grano. "
                             "4. No menciones el color de los objetos resaltados. "
                         )
@@ -205,10 +206,10 @@ def find_Groq(prompt):
                                 Tu única finalidad es identificar y extraer el objeto que se está buscando.
                                 
                                 REGLAS ESTRICTAS E INQUEBRANTABLES:
-                                1. CERO CONVERSACIÓN: NUNCA uses saludos, introducciones, explicaciones, ni puntuación final.
-                                2. UNA SOLA PALABRA: La salida debe ser ESTRICTAMENTE el sustantivo principal del objeto. Nada más.
-                                3. FORMATO: Devuelve la palabra siempre en minúsculas.
-                                4. OBJETOS COMPUESTOS: Si el usuario menciona características (ej. "taza roja") o nombres compuestos (ej. "gafas de sol"), extrae ÚNICAMENTE el sustantivo base ("taza", "gafas").
+                                1. Nunca uses saludos, introducciones, explicaciones, ni puntuación final.
+                                2. La salida debe ser estrictamente el sustantivo principal del objeto. Nada más.
+                                3. Devuelve la palabra siempre en minúsculas.
+                                4. Si el usuario menciona características (ej. "taza roja") o nombres compuestos (ej. "gafas de sol"), extrae ÚNICAMENTE el sustantivo base ("taza", "gafas").
                                 
                                 EJEMPLOS DE SALIDA ESPERADA:
                                 Entrada: "¿Dónde he dejado mis llaves?"

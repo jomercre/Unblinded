@@ -35,13 +35,13 @@ boton = tk.Button(ventana, text="Ejecutar", command=confirmar_seleccion, bg="#4C
 boton.pack(pady=20)
 ventana.mainloop()
 
-# Imagen de entrada
-
-img_path = 'Imagenes de ejemplo/new_img.png'
-
 # Generar el texto de salida
 
 if M == 'Lectura':
+    
+    # Imagen de entrada
+
+    img_path = 'Imagenes de ejemplo/lectura.png'
     
     # Leer la imagen
     
@@ -62,6 +62,11 @@ if M == 'Lectura':
         text = ask_Groq(prompt = corr_prompt)
     
 elif M == 'Descripción':
+    
+    # Imagen de entrada
+
+    img_path = 'Imagenes de ejemplo/descripcion_1.jpg'
+    #img_path = 'Imagenes de ejemplo/descripcion_2.jpg'
     
     # Obtener información de la imagen
     
