@@ -1,6 +1,6 @@
 # Unblinded
 
-Este proyecto, desarrollado por Axel Valton Juan y Joan Merlos Cremades, ha consistido en el desarrollo de un software que permita leer texto, describir paisajes, guiar hacia una determinada dirección y buscar objetos con la intención de hacer más sencillo el día a día de las personas invidentes. Para que este proyecto fuera concluido de forma adecuada se deberian implementar estas funciones en un dispositivo que tuviese cámara, altavoces, micrófono y gps. No obstante, en nuestro caso nos hemos limitado a desarrollar el código para que sea funcional en un ordenador convencional.
+Este proyecto, desarrollado por Axel Valton Juan y Joan Merlos Cremades, ha consistido en el desarrollo de un software que permita leer texto, describir paisajes, guiar hacia una determinada dirección y buscar objetos con la intención de hacer más sencillo el día a día de las personas invidentes. Para que este proyecto fuera concluido de forma adecuada se deberian implementar estas funciones en un dispositivo que tuviese cámara, micrófono y gps, conectándose a unos auriculares. No obstante, en nuestro caso nos hemos limitado a desarrollar el código para que sea funcional en un ordenador convencional.
 
 Los archivos de código desarrollado son:
 
