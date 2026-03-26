@@ -96,7 +96,6 @@ elif M == 'Navegación guiada':
     if resultado:
         
         # Iniciamos la navegación simulada
-        
         pasos = resultado[0]['legs'][0]['steps']
         iniciar_navegacion_simulada(pasos, origen_gps)
     
