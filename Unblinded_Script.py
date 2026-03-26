@@ -40,8 +40,10 @@ ventana.mainloop()
 if M == 'Lectura':
     
     # Imagen de entrada
-
-    img_path = 'Imagenes de ejemplo/lectura.png'
+    
+    img_path = 'Imagenes de ejemplo/lectura_1.webp'
+    #img_path = 'Imagenes de ejemplo/lectura_tarjeta.jpg'
+    #img_path = 'Imagenes de ejemplo/lectura.png'
     
     # Leer la imagen
     
